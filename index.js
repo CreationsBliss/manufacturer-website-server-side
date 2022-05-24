@@ -32,15 +32,22 @@ async function run() {
 
     app.get('/tool/:id', async (req, res) => {
       const id = req.params.id;
-      const query ={_id:ObjectId(id)};
+      const query = { _id: ObjectId(id) };
       const tool = await toolCollection.findOne(query);
       res.send(tool);
     });
 
-    app.post('/order', async(req, res)=>{
+    app.get('/order', async (req, res) => {
+      const customer = req.query.userEmail;
+      const query = { userEmail: customer };
+      const orders = await orderCollection.find(query).toArray();
+      res.send(orders);
+    });
+
+    app.post('/order', async (req, res) => {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
-      return res.send({success: true, result});
+      return res.send({ success: true, result });
     })
 
   }
