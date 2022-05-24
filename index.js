@@ -22,12 +22,25 @@ async function run() {
     await client.connect();
     const toolCollection = client.db('screw_driver').collection('tools');
     const orderCollection = client.db('screw_driver').collection('orders');
+    const userCollection = client.db('screw_driver').collection('users');
 
     app.get('/tool', async (req, res) => {
       const query = {};
       const cursor = toolCollection.find(query);
       const tools = await cursor.toArray();
       res.send(tools);
+    });
+
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
 
     app.get('/tool/:id', async (req, res) => {
