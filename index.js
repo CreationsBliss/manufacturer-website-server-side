@@ -42,7 +42,7 @@ async function run() {
     const userCollection = client.db('screw_driver').collection('users');
     const addProductCollection = client.db('screw_driver').collection('addProduct');
 
-    const verifyAdmin = async(req, res, next) =>{
+    const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
       const requesterAccount = await userCollection.findOne({ email: requester });
       if (requesterAccount.role === 'admin') {
@@ -76,12 +76,12 @@ async function run() {
 
     app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.params.email;
-        const filter = { email: email };
-        const updateDoc = {
-          $set: { role: 'admin' },
-        };
-        const result = await userCollection.updateOne(filter, updateDoc);
-        res.send(result);
+      const filter = { email: email };
+      const updateDoc = {
+        $set: { role: 'admin' },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
     });
 
     app.put('/user/:email', async (req, res) => {
@@ -124,11 +124,16 @@ async function run() {
       return res.send({ success: true, result });
     });
 
-    app.post('/tool', verifyJWT, verifyAdmin, async(req, res) =>{
+    app.get('/tools', verifyJWT, verifyAdmin, async (req, res) => {
+      const tools = await addProductCollection.find().toArray();
+      res.send(tools);
+    });
+
+    app.post('/tool', verifyJWT, verifyAdmin, async (req, res) => {
       const tool = req.body;
-      const result = await addProductCollection.insertOne(tool);
+      const result = await toolCollection.insertOne(tool);
       res.send(result);
-    })
+    });
 
   }
   finally {
