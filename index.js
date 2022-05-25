@@ -40,6 +40,18 @@ async function run() {
     const toolCollection = client.db('screw_driver').collection('tools');
     const orderCollection = client.db('screw_driver').collection('orders');
     const userCollection = client.db('screw_driver').collection('users');
+    const addProductCollection = client.db('screw_driver').collection('addProduct');
+
+    const verifyAdmin = async(req, res, next) =>{
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({ email: requester });
+      if (requesterAccount.role === 'admin') {
+        next();
+      }
+      else {
+        res.status(403).send({ message: 'Forbidden' });
+      }
+    }
 
     app.get('/tool', async (req, res) => {
       const query = {};
@@ -56,27 +68,20 @@ async function run() {
 
     app.get('/admin/:email', async (req, res) => {
       const email = req.params.email;
-      const user = await userCollection.findOne({email: email});
+      const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === "admin";
-      res.send({admin: isAdmin})
+      res.send({ admin: isAdmin })
     });
 
 
-    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+    app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.params.email;
-      const requester = req.decoded.email;
-      const requesterAccount = await userCollection.findOne({ email: requester });
-      if (requesterAccount.role === 'admin') {
         const filter = { email: email };
         const updateDoc = {
           $set: { role: 'admin' },
         };
         const result = await userCollection.updateOne(filter, updateDoc);
         res.send(result);
-      }
-      else {
-        res.status(403).send({ message: 'Forbidden' });
-      }
     });
 
     app.put('/user/:email', async (req, res) => {
@@ -91,6 +96,7 @@ async function run() {
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
       res.send({ result, token });
     });
+
 
     app.get('/tool/:id', async (req, res) => {
       const id = req.params.id;
@@ -116,6 +122,12 @@ async function run() {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
       return res.send({ success: true, result });
+    });
+
+    app.post('/tool', verifyJWT, verifyAdmin, async(req, res) =>{
+      const tool = req.body;
+      const result = await addProductCollection.insertOne(tool);
+      res.send(result);
     })
 
   }
@@ -129,7 +141,7 @@ run().catch(console.dir);
 
 app.get('/', (req, res) => {
   res.send('Hello from Screw Driver')
-})
+});
 
 app.listen(port, () => {
   console.log(`Screw Driver app listening on port ${port}`)
