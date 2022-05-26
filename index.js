@@ -67,8 +67,6 @@ async function run() {
     });
 
 
-
-
     app.get('/review', async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
@@ -85,7 +83,21 @@ async function run() {
 
 
 
-    
+
+
+
+    // app.get('/user/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: ObjectId(id) };
+    //   const result = await userCollection.findOne(query);
+    //   res.send(result);
+    // })
+
+
+
+
+
+
 
     app.get('/user', verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
@@ -167,17 +179,18 @@ async function run() {
     app.patch('/order/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
+      // console.log(payment.payment.transactionId);
       const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
           paid: true,
-          transactionId: payment.transactionId,
+          transactionId: payment.payment.transactionId,
         }
       }
 
       const result = await paymentCollection.insertOne(payment);
       const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
-      res.send(updatedDoc);
+      res.send(updatedOrder);
 
     });
 
