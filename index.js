@@ -41,7 +41,7 @@ async function run() {
     await client.connect();
     const toolCollection = client.db('screw_driver').collection('tools');
 
-    // const reviewCollection = client.db('screw_driver').collection('reviews');
+    const reviewCollection = client.db('screw_driver').collection('reviews');
 
     const orderCollection = client.db('screw_driver').collection('orders');
     const paymentCollection = client.db('screw_driver').collection('payments');
@@ -69,14 +69,23 @@ async function run() {
 
 
 
-    // app.get('/review', async (req, res) => {
-    //   const query = {};
-    //   const cursor = reviewCollection.find(query);
-    //   const reviews = await cursor.toArray();
-    //   res.send(reviews);
-    // });
+    app.get('/review', async (req, res) => {
+      const query = {};
+      const cursor = reviewCollection.find(query);
+      const reviews = await cursor.toArray();
+      res.send(reviews);
+    });
 
 
+    app.post('/review', async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+
+
+    
 
     app.get('/user', verifyJWT, async (req, res) => {
       const users = await userCollection.find().toArray();
