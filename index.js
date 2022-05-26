@@ -82,10 +82,6 @@ async function run() {
     });
 
 
-
-
-
-
     // app.put('/user/:id', async (req, res) => {
     //   const id = req.params.id;
     //   const updatedUser = req.body;
@@ -104,11 +100,6 @@ async function run() {
     //   res.send(result);
 
     // })
-
-
-
-
-
 
 
     app.get('/user', verifyJWT, async (req, res) => {
@@ -180,14 +171,11 @@ async function run() {
     });
 
 
-
     app.post('/order', async (req, res) => {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
       return res.send({ success: true, result });
     });
-
-
 
 
     // delete user specific order
@@ -199,10 +187,6 @@ async function run() {
       res.send(result);
 
     });
-
-
-
-
 
 
     app.patch('/order/:id', verifyJWT, async (req, res) => {
