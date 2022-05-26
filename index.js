@@ -5,6 +5,8 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+// const ObjectId = require('mongodb').ObjectId;
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -40,9 +42,7 @@ async function run() {
   try {
     await client.connect();
     const toolCollection = client.db('screw_driver').collection('tools');
-
     const reviewCollection = client.db('screw_driver').collection('reviews');
-
     const orderCollection = client.db('screw_driver').collection('orders');
     const paymentCollection = client.db('screw_driver').collection('payments');
     const userCollection = client.db('screw_driver').collection('users');
@@ -86,11 +86,23 @@ async function run() {
 
 
 
-    // app.get('/user/:id', async (req, res) => {
+    // app.put('/user/:id', async (req, res) => {
     //   const id = req.params.id;
-    //   const query = { _id: ObjectId(id) };
-    //   const result = await userCollection.findOne(query);
+    //   const updatedUser = req.body;
+    //   const filter = { _id: ObjectId(id) };
+    //   const options = { upsert: true };
+    //   const updatedDoc = {
+    //     $set: {
+    //       education: updatedUser.education,
+    //       location:  updatedUser.location,
+    //       phone: updatedUser.phone,
+    //       linkedin: updatedUser.linkedin
+    //     }
+    //   };
+
+    //   const result = await userCollection.updateOne(filter, updatedDoc, options);
     //   res.send(result);
+
     // })
 
 
@@ -174,6 +186,23 @@ async function run() {
       const result = await orderCollection.insertOne(order);
       return res.send({ success: true, result });
     });
+
+
+
+
+    // delete user specific order
+
+    app.delete('/order/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+
+    });
+
+
+
+
 
 
     app.patch('/order/:id', verifyJWT, async (req, res) => {
